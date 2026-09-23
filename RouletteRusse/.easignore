@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+.git/
+dist/
+dist-game/
+web-build/
+ios/
+android/
+.env*.local
+*.tsbuildinfo
+*.log
+*.p8
+*.p12
+*.pem
+*.key
+*.jks
+*.mobileprovision
