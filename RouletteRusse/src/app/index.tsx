@@ -12,6 +12,7 @@ import { EndGameModal } from '@/components/EndGameModal';
 import { useGame } from '@/hooks/useGame';
 import { useGameAds } from '@/hooks/useGameAds';
 import { AdBanner } from '@/components/AdBanner';
+import { SettingsPanel } from '@/components/SettingsPanel';
 
 export default function GameScreen() {
   const { state, audio, dispatch, reset, toggle, trigger } = useGame();
@@ -36,11 +37,13 @@ export default function GameScreen() {
   return <View style={[styles.screen, state.phase === 'result' && styles.red]}>
     <StatusBar style="light" hidden={state.phase === 'result'} />
     <SafeAreaView style={styles.safe}>
-      {state.phase !== 'result' && <View style={styles.toolbar}>
-        {state.phase !== 'home' ? <PrimaryButton small symbol="⌂" label="Accueil" onPress={goHome} /> : <View />}
+      {state.phase !== 'result' && state.phase !== 'home' && <View style={styles.toolbar}>
+        <PrimaryButton small symbol="⌂" label="Accueil" onPress={goHome} />
         {state.phase === 'playing' && <MusicToggle enabled={audio.musicEnabled} onPress={audio.toggleMusic} />}
       </View>}
-      <ScrollView contentContainerStyle={styles.content} bounces={false}>
+      {state.phase === 'home' && ads.ready && ads.sdk && ads.units && <AdBanner
+        key={`home-top-${ads.revision}`} sdk={ads.sdk} unitId={ads.units.banner} placement="top" />}
+      <ScrollView contentContainerStyle={[styles.content, state.phase === 'home' && styles.homeContent]} bounces={false}>
         {state.phase === 'home' && <View style={styles.home}>
           <View style={styles.playHalo}><PrimaryButton symbol="▶" caption="JOUER" label="Jouer" onPress={() => reset('configure')} /></View>
         </View>}
@@ -68,10 +71,11 @@ export default function GameScreen() {
         </>}
         {audio.audioError && state.phase !== 'result' && <Text accessibilityRole="alert" style={styles.hint}>Sound unavailable</Text>}
       </ScrollView>
+      {state.phase === 'home' && <SettingsPanel />}
       {state.phase === 'home' && ads.privacyRequired && <Pressable
         accessibilityRole="button" accessibilityLabel="Choix de confidentialité publicitaire"
         disabled={ads.privacyBusy} onPress={ads.showPrivacyOptions} style={styles.privacy}>
-        <Text style={styles.hint}>Confidentialité</Text>
+        <Text style={styles.hint}>Privacy options</Text>
       </Pressable>}
       {state.phase === 'home' && ads.privacyError && <Text accessibilityRole="alert" style={styles.hint}>
         Confidentialité indisponible. Réessayez plus tard.
@@ -86,6 +90,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#1261A0' }, red: { backgroundColor: '#E32636' }, safe: { flex: 1 },
   toolbar: { height: 68, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   content: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 20, gap: 24, paddingBottom: 32 },
+  homeContent: { paddingBottom: 20 },
   home: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   playHalo: { width: 240, height: 240, borderRadius: 120, borderColor: '#FFFFFF25', borderWidth: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF08' },
   row: { flexDirection: 'row', gap: 16, alignItems: 'center' },

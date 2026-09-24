@@ -28,13 +28,17 @@ function Banner({ sdk, unitId }: { sdk: MobileAdsSdk; unitId: string }) {
     onAdFailedToLoad={() => setFailed(true)} />;
 }
 
-export function AdBanner({ sdk, unitId }: { sdk: MobileAdsSdk; unitId: string }) {
-  return <View style={styles.slot}>
+export function AdBanner({ sdk, unitId, placement = 'bottom' }: {
+  sdk: MobileAdsSdk; unitId: string; placement?: 'top' | 'bottom';
+}) {
+  return <View style={[styles.slot, placement === 'top' ? styles.top : styles.bottom]}>
     <AdErrorBoundary><Banner sdk={sdk} unitId={unitId} /></AdErrorBoundary>
   </View>;
 }
 
 const styles = StyleSheet.create({
   // A normal flex sibling of the ScrollView: never covers a game control.
-  slot: { flexShrink: 0, alignItems: 'center', minHeight: 50, paddingTop: 8 },
+  slot: { flexShrink: 0, alignItems: 'center', minHeight: 50 },
+  top: { paddingBottom: 8 },
+  bottom: { paddingTop: 8 },
 });

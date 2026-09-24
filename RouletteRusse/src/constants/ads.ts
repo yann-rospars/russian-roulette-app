@@ -1,5 +1,5 @@
-// Number of completed games between interstitial opportunities (3, 6, 9...).
-export const INTERSTITIAL_EVERY_N_GAMES = 3;
+// Number of completed games between interstitial opportunities (2, 4, 6...).
+export const INTERSTITIAL_EVERY_N_GAMES = 2;
 
 export const PRODUCTION_AD_UNITS = {
   android: {

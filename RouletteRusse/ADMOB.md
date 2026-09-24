@@ -4,10 +4,10 @@ Le projet conserve Expo 57 / React Native 0.86. `react-native-google-mobile-ads`
 
 ## Publicités
 
-- Une bannière adaptative, dans une zone dédiée sous le contenu défilant et à l’intérieur de la safe area, sur Home, configuration et rotation. Les dimensions du pistolet et du barillet restent identiques. Sur les petits écrans, le contenu reste défilable.
+- Sur Home, deux bannières adaptatives encadrent le contenu : une en haut, une en bas, avec la même Ad Unit et des espacements symétriques vers le bouton JOUER. Les deux emplacements restent dans la safe area, hors du contenu défilant et sans superposition aux commandes. Configuration et rotation conservent une seule bannière en bas. Les dimensions du pistolet et du barillet restent identiques. Sur les petits écrans, le contenu reste défilable.
 - Aucune bannière en `playing` ou `result`. Le composant est démonté dès COMMENCER ; pas simplement masqué.
 - Chaque passage à `result` compte une partie terminée, une seule fois. Le compteur reste en mémoire pour la session de cet écran, y compris en passant par Home ; il repart à zéro au redémarrage de l’application. Abandonner une partie ne compte pas.
-- Aux parties 3, 6, 9, etc., RECOMMENCER ferme d’abord la popup native, puis affiche l’interstitielle uniquement si elle est déjà chargée et si l’app est au premier plan. Le retour au barillet attend sa fermeture. Home ne déclenche jamais d’interstitielle.
+- Aux parties 2, 4, 6, etc., RECOMMENCER ferme d’abord la popup native, puis affiche l’interstitielle uniquement si elle est déjà chargée et si l’app est au premier plan. Le retour au barillet attend sa fermeture. Home ne déclenche jamais d’interstitielle.
 - Si la pub manque, l’occasion est ignorée sans attendre son chargement et sans la reporter à la partie suivante. Préchargement après consentement, après fermeture et nouvelles tentatives avec temporisation en cas d’erreur. Les annonces expirées sont renouvelées. Une erreur de présentation rend la main au jeu.
 - Fréquence : `INTERSTITIAL_EVERY_N_GAMES` dans `src/constants/ads.ts`.
 - Web et Expo Go continuent sans publicité. Tester réellement AdMob exige le Development Build.
@@ -66,7 +66,7 @@ Références : [Expo DevClient 57](https://docs.expo.dev/versions/v57.0.0/sdk/de
 Les contrôles locaux ne remplacent pas l’exécution du SDK natif sur un téléphone.
 
 1. Vérifier l’indication « Test Ad » sur chaque écran prévu et l’accès à tous les boutons/chambres, y compris sur un petit écran.
-2. COMMENCER : aucune bannière ; terminer les parties 1 et 2, puis vérifier l’interstitielle après RECOMMENCER à la partie 3 et le retour au barillet après fermeture. Refaire jusqu’à 6.
+2. COMMENCER : aucune bannière ; terminer la partie 1 sans interstitielle, puis vérifier l’interstitielle après RECOMMENCER à la partie 2 et le retour au barillet après fermeture. Refaire jusqu’à 6 pour vérifier les parties 4 et 6.
 3. Répéter sans Internet : le jeu reste jouable et RECOMMENCER retourne au barillet sans attendre une publicité.
 4. Tester le refus, l’acceptation et la modification du consentement depuis Confidentialité, puis le retour au premier plan.
 5. Vérifier les mêmes scénarios dans le build Android avant diffusion.

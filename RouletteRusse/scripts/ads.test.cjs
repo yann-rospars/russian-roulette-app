@@ -46,7 +46,7 @@ function fixture() {
     return ad;
   });
   const complete = () => { controller.observePhase('playing'); controller.observePhase('result'); };
-  const completeThree = () => { complete(); complete(); complete(); };
+  const completeTwo = () => { complete(); complete(); };
   const advance = ms => {
     const until = now + ms;
     for (;;) {
@@ -58,7 +58,7 @@ function fixture() {
     }
     now = until;
   };
-  return { controller, ads, complete, completeThree, advance, timers };
+  return { controller, ads, complete, completeTwo, advance, timers };
 }
 
 for (const platform of ['ios', 'android']) {
@@ -81,7 +81,7 @@ test('ads remain unloaded before UMP authorization', () => {
   assert.equal(ads[0].loads, 1);
 });
 
-test('only games 3 and 6 show on restart, then wait for close and preload the next ad', () => {
+test('only games 2, 4 and 6 show on restart, then wait for close and preload the next ad', () => {
   const { controller, ads, complete } = fixture();
   controller.setEnabled(true);
   let resumed = 0;
@@ -92,7 +92,7 @@ test('only games 3 and 6 show on restart, then wait for close and preload the ne
     controller.observePhase('result'); // A rerender is not another completed game.
     assert.equal(ad.shows, 0);
     controller.restart(() => resumed++, true);
-    if (game % 3 === 0) {
+    if (game % 2 === 0) {
       assert.equal(ad.shows, 1);
       assert.equal(resumed, game - 1);
       controller.restart(() => resumed++, true); // Double tap while opening.
@@ -116,7 +116,6 @@ test('abandoning a game does not count; Home after BOOM counts but never shows a
     controller.observePhase('home');
   }
   complete(); controller.observePhase('home');
-  complete(); controller.observePhase('home');
   assert.equal(ads[0].shows, 0);
   complete();
   controller.restart(() => {}, true);
@@ -124,10 +123,10 @@ test('abandoning a game does not count; Home after BOOM counts but never shows a
   controller.dispose();
 });
 
-test('not loaded at game 3: return immediately and never show a late load on game 4', () => {
-  const { controller, ads, completeThree, complete } = fixture();
+test('not loaded at game 2: return immediately and never show a late load on game 3', () => {
+  const { controller, ads, completeTwo, complete } = fixture();
   controller.setEnabled(true);
-  completeThree();
+  completeTwo();
   let resumed = 0;
   controller.restart(() => resumed++, true);
   assert.equal(resumed, 1);
@@ -141,11 +140,11 @@ test('not loaded at game 3: return immediately and never show a late load on gam
 
 for (const failure of ['event', 'rejection', 'throw', 'timeout']) {
   test(`presentation ${failure}: resume exactly once and retry loading later`, async () => {
-    const { controller, ads, completeThree, advance } = fixture();
+    const { controller, ads, completeTwo, advance } = fixture();
     controller.setEnabled(true);
     const ad = ads[0];
     ad.emit('loaded');
-    completeThree();
+    completeTwo();
     ad.rejectShow = failure === 'rejection';
     ad.throwShow = failure === 'throw';
     let resumed = 0;
@@ -164,10 +163,10 @@ for (const failure of ['event', 'rejection', 'throw', 'timeout']) {
 }
 
 test('an opened ad is not interrupted by the presentation watchdog', () => {
-  const { controller, ads, completeThree, advance } = fixture();
+  const { controller, ads, completeTwo, advance } = fixture();
   controller.setEnabled(true);
   ads[0].emit('loaded');
-  completeThree();
+  completeTwo();
   let resumed = false;
   controller.restart(() => { resumed = true; }, true);
   ads[0].emit('opened');
@@ -178,11 +177,11 @@ test('an opened ad is not interrupted by the presentation watchdog', () => {
 });
 
 test('offline loads time out and retry with backoff without holding navigation', () => {
-  const { controller, ads, completeThree, advance } = fixture();
+  const { controller, ads, completeTwo, advance } = fixture();
   controller.setEnabled(true);
   advance(20_000);
   assert.equal(ads[0].destroyed, true);
-  completeThree();
+  completeTwo();
   let resumed = false;
   controller.restart(() => { resumed = true; }, true);
   assert.equal(resumed, true);
@@ -194,11 +193,11 @@ test('offline loads time out and retry with backoff without holding navigation',
 
 test('backgrounded or expired ads are skipped', () => {
   for (const scenario of ['background', 'expired']) {
-    const { controller, ads, completeThree, advance } = fixture();
+    const { controller, ads, completeTwo, advance } = fixture();
     controller.setEnabled(true);
     ads[0].emit('loaded');
     if (scenario === 'expired') advance(56 * 60_000);
-    completeThree();
+    completeTwo();
     let resumed = false;
     controller.restart(() => { resumed = true; }, scenario !== 'background');
     assert.equal(resumed, true);
